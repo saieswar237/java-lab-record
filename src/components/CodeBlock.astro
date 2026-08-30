@@ -10,12 +10,12 @@ const { code, filename } = Astro.props;
 const html = highlightJava(code);
 ---
 
-<div class="border border-rule rounded-[4px] overflow-hidden">
+<div class="border border-rule overflow-hidden">
   <div class="flex items-center justify-between gap-3 bg-surface border-b border-rule px-4 py-2">
-    <span class="font-mono text-sm text-muted">{filename ?? 'Source'}</span>
+    <span class="font-mono text-sm text-muted truncate min-w-0">{filename ?? 'Source'}</span>
     <button
       type="button"
-      class="no-print btn !py-1 !px-2"
+      class="no-print btn !py-1 !px-2 shrink-0"
       data-copy
       data-code={code}
       aria-label="Copy source code to clipboard"
@@ -31,11 +31,11 @@ const html = highlightJava(code);
 
 <style>
   :global(.tk-keyword) {
-    color: var(--keyword);
+    color: var(--accent);
     font-weight: 600;
   }
   :global(.tk-string) {
-    color: var(--string);
+    color: var(--patina);
   }
   :global(.tk-comment) {
     color: var(--muted);

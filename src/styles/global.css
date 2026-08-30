@@ -3,51 +3,53 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------
-   Palette. Six roles, taken from Java syntax highlighting:
-   keyword blue, string green, and the console the program prints into.
+   Palette. Six roles quarried from classical materials: Pentelic marble,
+   basalt ink, Aegean blue and the verdigris of weathered bronze.
    Light is the default; dark is redefined in two places so that both the
    system preference and an explicit toggle resolve correctly.
    --------------------------------------------------------------------- */
 :root {
-  --ink: #151c24;
-  --ground: #dde1de;
-  --surface: #eef0ed;
-  --keyword: #2b34c8;
-  --string: #2e6b44;
-  --console: #0e1418;
+  --ink: #22262b;
+  --ground: #e3e6e6;
+  --surface: #f0f2f1;
+  --accent: #17527f;
+  --patina: #2f6355;
+  --console: #191d21;
 
   /* derived */
-  --muted: #4a5560;
-  --rule: #c3c9c5;
-  --console-ink: #d6ded8;
-  --console-dim: #8b9a92;
-  --console-rule: #263038;
+  --muted: #545c63;
+  --rule: #c6cac8;
+  --stone: #d3d7d6;
+  --console-ink: #dbe0dd;
+  --console-dim: #8d9a94;
+  --console-rule: #2b3238;
 
-  --rail-w: 2.75rem;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --ink: #dde1de;
-    --ground: #10161c;
-    --surface: #19212a;
-    --keyword: #8e97ff;
-    --string: #6fbf8c;
-    --muted: #94a0ac;
-    --rule: #2b3640;
+    --ink: #e3e6e6;
+    --ground: #14181c;
+    --surface: #1d2328;
+    --accent: #7fb3dc;
+    --patina: #6fb6a0;
+    --muted: #98a2a8;
+    --rule: #333b42;
+    --stone: #262d33;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --ink: #dde1de;
-  --ground: #10161c;
-  --surface: #19212a;
-  --keyword: #8e97ff;
-  --string: #6fbf8c;
-  --muted: #94a0ac;
-  --rule: #2b3640;
+  --ink: #e3e6e6;
+  --ground: #14181c;
+  --surface: #1d2328;
+  --accent: #7fb3dc;
+  --patina: #6fb6a0;
+  --muted: #98a2a8;
+  --rule: #333b42;
+  --stone: #262d33;
   color-scheme: dark;
 }
 
@@ -55,17 +57,15 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    /* Always reserve the scrollbar, so mounting the PDF viewer cannot
-       narrow the page and nudge everything sideways. */
     scrollbar-gutter: stable;
   }
 
   body {
     background-color: var(--ground);
     color: var(--ink);
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
-    font-size: 1.0625rem;
-    line-height: 1.6;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 1.125rem;
+    line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -76,132 +76,204 @@
     text-wrap: balance;
   }
 
-  /* One focus treatment, everywhere, always visible. */
   :focus-visible {
-    outline: 2px solid var(--keyword);
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
-    border-radius: 2px;
+    border-radius: 1px;
   }
 
   ::selection {
-    background: var(--keyword);
+    background: var(--accent);
     color: var(--ground);
   }
 }
 
 @layer components {
-  /* --- The javadoc rail: navigation, framing and progress in one -------- */
-  .rail-cell {
-    position: relative;
+  /* -------------------------------------------------------------------
+     THE FACADE — the signature element.
+
+     Eight columns, one per week, standing on a stylobate beneath an
+     architrave. It is not ornament: it carries the week sequence, marks
+     which records are bound, shows where the reader is standing, and
+     every column is a link. Remove it and the site loses its navigation.
+     ------------------------------------------------------------------- */
+  .facade-architrave {
+    height: 5px;
+    background: var(--ink);
   }
 
-  /* the vertical stem */
-  .rail-cell::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    transform: translateX(-50%);
-    background: var(--rule);
+  .facade-frieze {
+    height: 3px;
+    margin-top: 3px;
+    background: var(--stone);
   }
 
-  .rail-node {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    place-items: center;
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 9999px;
-    border: 1px solid var(--muted);
-    background: var(--ground);
+  .facade-cols {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 0 2px;
   }
 
-  /* a week that has a record bound to it */
-  .rail-node[data-state='filled'] {
-    background: var(--string);
-    border-color: var(--string);
+  .facade-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
   }
 
-  .rail-node[data-state='current'] {
-    background: var(--keyword);
-    border-color: var(--keyword);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--keyword) 22%, transparent);
+  .facade-col-capital,
+  .facade-col-base {
+    width: 100%;
+    max-width: 3.25rem;
+    height: 7px;
+    background: var(--muted);
+    transition: background-color 160ms ease;
   }
 
-  .rail-node[data-state='empty'] {
-    background: var(--ground);
-    border-style: dashed;
+  /* The flutes are real, cut with a repeating gradient. */
+  .facade-col-shaft {
+    width: 100%;
+    max-width: 2.5rem;
+    height: var(--shaft-h, 3.25rem);
+    background:
+      repeating-linear-gradient(
+        to right,
+        transparent 0 4px,
+        color-mix(in srgb, var(--ink) 16%, transparent) 4px 5px
+      ),
+      var(--stone);
+    transition: background-color 160ms ease;
   }
 
-  /* A line inside a javadoc block: carries its own leading asterisk. */
-  .jd-line {
-    position: relative;
-    padding-left: 1.35rem;
+  /* A week whose record is bound stands in weathered bronze. */
+  .facade-col[data-state='filled'] .facade-col-shaft {
+    background:
+      repeating-linear-gradient(
+        to right,
+        transparent 0 4px,
+        color-mix(in srgb, #000 22%, transparent) 4px 5px
+      ),
+      var(--patina);
   }
 
-  .jd-line::before {
-    content: '*';
-    position: absolute;
-    left: 0.3rem;
+  .facade-col[data-state='filled'] .facade-col-capital,
+  .facade-col[data-state='filled'] .facade-col-base {
+    background: var(--patina);
+  }
+
+  /* Where the reader is standing. */
+  .facade-col[data-state='current'] .facade-col-shaft {
+    background:
+      repeating-linear-gradient(
+        to right,
+        transparent 0 4px,
+        color-mix(in srgb, #000 26%, transparent) 4px 5px
+      ),
+      var(--accent);
+  }
+
+  .facade-col[data-state='current'] .facade-col-capital,
+  .facade-col[data-state='current'] .facade-col-base {
+    background: var(--accent);
+  }
+
+  /* A week with no record yet: a column not yet raised. */
+  .facade-col[data-state='empty'] .facade-col-shaft {
+    background: transparent;
+    border-left: 1px dashed var(--muted);
+    border-right: 1px dashed var(--muted);
+  }
+
+  .facade-col[data-state='empty'] .facade-col-capital,
+  .facade-col[data-state='empty'] .facade-col-base {
+    background: var(--stone);
+  }
+
+  .facade-col:hover .facade-col-shaft {
+    filter: brightness(1.08);
+  }
+
+  /* On narrow screens the capitals grow wider than their slot and the
+     colonnade fuses into a striped bar. Cut the stone down to fit. */
+  @media (max-width: 640px) {
+    .facade-col-capital,
+    .facade-col-base {
+      max-width: 2rem;
+      height: 5px;
+    }
+
+    .facade-col-shaft {
+      max-width: 1.375rem;
+    }
+  }
+
+  /* The temple steps. */
+  .facade-step {
+    display: block;
+    height: 4px;
+    margin: 0 auto;
+    background: var(--ink);
+  }
+
+  .facade-label {
+    font-family: Cinzel, Georgia, serif;
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-align: center;
     color: var(--muted);
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.8125rem;
-    font-weight: 400;
   }
 
-  .javadoc-mark {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.8125rem;
+  .facade-col[data-state='current'] .facade-label {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* -------------------------------------------------------------------
+     Inscription: letterspaced capitals, the way a dedication is cut.
+     ------------------------------------------------------------------- */
+  .inscription {
+    font-family: Cinzel, Georgia, serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
     color: var(--muted);
-    line-height: 1;
   }
 
-  /* --- Cards ----------------------------------------------------------- */
+  /* --- Cards ---------------------------------------------------------- */
   .week-card {
     display: block;
     background: var(--surface);
     border: 1px solid var(--rule);
-    border-radius: 4px;
+    border-left: 3px solid var(--stone);
     transition:
-      border-color 140ms ease,
-      transform 140ms ease;
+      border-left-color 160ms ease,
+      background-color 160ms ease;
   }
 
   .week-card:hover {
-    border-color: var(--keyword);
-    transform: translateX(2px);
+    border-left-color: var(--accent);
   }
 
-  /* Reserve the reading height up front: the iframe mounts into a box that
-     is already the right size, so nothing below it moves. */
-  @media (min-width: 768px) {
-    .pdf-frame {
-      min-height: min(82vh, 1100px);
-    }
-  }
-
-  /* --- The console: the only inverted surface on the site -------------- */
+  /* --- The console ---------------------------------------------------- */
   .console-block {
     background: var(--console);
     color: var(--console-ink);
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
     font-size: 0.9375rem;
     line-height: 1.7;
-    border-radius: 4px;
     overflow-x: auto;
   }
 
   .chip {
     display: inline-block;
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.8125rem;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 0.9375rem;
     line-height: 1;
-    padding: 0.375rem 0.5rem;
+    padding: 0.4rem 0.6rem;
     border: 1px solid var(--rule);
-    border-radius: 3px;
     color: var(--muted);
     white-space: nowrap;
   }
@@ -210,40 +282,57 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.875rem;
-    padding: 0.5rem 0.875rem;
-    border-radius: 3px;
-    border: 1px solid var(--rule);
+    font-family: Cinzel, Georgia, serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--muted);
     color: var(--ink);
     transition:
-      border-color 140ms ease,
-      background-color 140ms ease;
+      border-color 160ms ease,
+      background-color 160ms ease,
+      color 160ms ease;
   }
 
   .btn:hover {
-    border-color: var(--keyword);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .btn-primary {
-    background: var(--keyword);
-    border-color: var(--keyword);
+    background: var(--accent);
+    border-color: var(--accent);
     color: var(--ground);
   }
 
   .btn-primary:hover {
-    background: var(--keyword);
-    filter: brightness(1.1);
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--ground);
+  }
+
+  .pdf-frame {
+    background: var(--surface);
+  }
+
+  @media (min-width: 768px) {
+    .pdf-frame {
+      min-height: min(82vh, 1100px);
+    }
   }
 }
 
 /* ---------------------------------------------------------------------
-   Motion. One orchestrated moment: the rail compiles on first paint.
+   Motion. The facade is raised: columns rise onto the stylobate in
+   sequence. Sections beyond the fold are revealed on approach. One idea,
+   applied twice — not five scattered effects.
    --------------------------------------------------------------------- */
-@keyframes rail-land {
+@keyframes raise {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -251,10 +340,10 @@
   }
 }
 
-@keyframes node-fill {
+@keyframes settle {
   from {
     opacity: 0;
-    transform: scale(0.2);
+    transform: scaleX(0.92);
   }
   to {
     opacity: 1;
@@ -262,14 +351,29 @@
   }
 }
 
-.compile-in {
-  animation: rail-land 380ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+.raise-in {
+  animation: raise 420ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
   animation-delay: var(--stagger, 0ms);
 }
 
-.compile-node {
-  animation: node-fill 260ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+.settle-in {
+  animation: settle 460ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
   animation-delay: var(--stagger, 0ms);
+  transform-origin: center;
+}
+
+/* Gated behind `js`, so with no scripting the page is simply visible. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 460ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    transform 460ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -277,9 +381,15 @@
     scroll-behavior: auto;
   }
 
-  .compile-in,
-  .compile-node {
+  .raise-in,
+  .settle-in {
     animation: none !important;
+  }
+
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 
   *,
@@ -306,8 +416,9 @@
     --surface: #ffffff;
     --muted: #333333;
     --rule: #999999;
-    --keyword: #000000;
-    --string: #000000;
+    --stone: #cccccc;
+    --accent: #000000;
+    --patina: #000000;
   }
 
   body {
@@ -320,10 +431,15 @@
   nav,
   footer,
   .btn,
-  .rail-cell,
+  .facade,
   .pdf-frame,
   .pdf-fallback {
     display: none !important;
+  }
+
+  .js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   .print-header {

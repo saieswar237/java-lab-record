@@ -1,0 +1,73 @@
+---
+import { experiments } from '../data/labData';
+import { weekHref } from '../lib/paths';
+import { recordExists } from '../lib/records';
+
+interface Props {
+  /** The week being read, if any. Omitted on the landing page. */
+  current?: number;
+  /** Shaft height. The landing page stands taller than a week page. */
+  height?: string;
+  /** Animate the columns up on load. Only the first facade a reader meets. */
+  animate?: boolean;
+}
+
+const { current, height = '3.25rem', animate = false } = Astro.props;
+
+const columns = experiments.map((e) => ({
+  week: e.week,
+  title: e.title,
+  bound: recordExists(e.pdf),
+}));
+
+const stateOf = (week: number, bound: boolean) =>
+  week === current ? 'current' : bound ? 'filled' : 'empty';
+
+const boundCount = columns.filter((c) => c.bound).length;
+---
+
+<nav
+  class="facade no-print"
+  aria-label={current ? `All weeks, currently reading week ${current}` : 'All weeks'}
+>
+  <div class={animate ? 'settle-in' : ''} style="--stagger:420ms">
+    <div class="facade-architrave"></div>
+    <div class="facade-frieze"></div>
+  </div>
+
+  <ol class="facade-cols list-none m-0 p-0 mt-3">
+    {
+      columns.map((c, i) => (
+        <li
+          class={`facade-col ${animate ? 'raise-in' : ''}`}
+          data-state={stateOf(c.week, c.bound)}
+          style={`--shaft-h:${height}; --stagger:${60 + i * 45}ms`}
+        >
+          <a
+            href={weekHref(c.week)}
+            class="flex flex-col items-center w-full"
+            aria-current={c.week === current ? 'page' : undefined}
+            aria-label={`Week ${String(c.week).padStart(2, '0')}: ${c.title}${
+              c.bound ? '' : ' — record not uploaded yet'
+            }`}
+          >
+            <span class="facade-col-capital"></span>
+            <span class="facade-col-shaft"></span>
+            <span class="facade-col-base"></span>
+            <span class="facade-label mt-2">{String(c.week).padStart(2, '0')}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+
+  <div class={`mt-3 ${animate ? 'settle-in' : ''}`} style="--stagger:480ms">
+    <span class="facade-step" style="width:100%"></span>
+    <span class="facade-step" style="width:97%; margin-top:2px"></span>
+    <span class="facade-step" style="width:94%; margin-top:2px"></span>
+  </div>
+
+  <p class="sr-only">
+    {boundCount} of {columns.length} records are uploaded.
+  </p>
+</nav>

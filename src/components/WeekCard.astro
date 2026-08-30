@@ -10,43 +10,31 @@ interface Props {
 
 const { experiment, bound, index } = Astro.props;
 const n = String(experiment.week).padStart(2, '0');
-const stagger = `${80 + index * 45}ms`;
+// Stagger the reveal so the list settles in order, like courses of stone.
+const delay = `${Math.min(index, 5) * 60}ms`;
 ---
 
 <li
-  class="week-row grid grid-cols-[1.5rem_1fr] sm:grid-cols-[var(--rail-w)_1fr] items-stretch"
+  class="week-row"
   data-week={experiment.week}
   data-title={experiment.title.toLowerCase()}
   data-concepts={experiment.concepts.join(' ').toLowerCase()}
   data-aim={experiment.aim.toLowerCase()}
 >
-  {/* Rail cell: the stem runs the full row height, the node sits on it. */}
-  <div class="rail-cell flex justify-center pt-7" aria-hidden="true">
-    <span
-      class="rail-node compile-node"
-      data-state={bound ? 'filled' : 'empty'}
-      style={`--stagger:${stagger}`}
-    ></span>
-  </div>
-
-  <div class="compile-in pb-3" style={`--stagger:${stagger}`}>
-    <a href={weekHref(experiment.week)} class="week-card group px-4 py-4 sm:px-5 sm:py-5">
-      <div class="flex items-baseline gap-3">
-        <span class="font-display text-lg sm:text-h2 leading-none text-keyword">{n}</span>
-        <h2 class="font-sans font-semibold text-base sm:text-lg leading-snug group-hover:text-keyword">
+  <div data-reveal style={`transition-delay:${delay}`}>
+    <a href={weekHref(experiment.week)} class="week-card group px-5 py-5 sm:px-7 sm:py-6">
+      <div class="flex items-baseline gap-4">
+        <span class="font-display text-lg sm:text-h2 font-semibold leading-none text-accent shrink-0">
+          {n}
+        </span>
+        <h2 class="font-serif font-semibold text-lg sm:text-h2 leading-snug group-hover:text-accent">
           {experiment.title}
         </h2>
       </div>
-      <p class="mt-2 text-sm text-muted line-clamp-2 max-w-measure">
+      <p class="mt-2.5 text-base text-muted line-clamp-2 max-w-measure">
         {experiment.aim}
       </p>
-      {
-        !bound && (
-          <p class="mt-2 font-mono text-sm text-muted">
-            Record not uploaded yet
-          </p>
-        )
-      }
+      {!bound && <p class="inscription mt-3">Record not uploaded yet</p>}
     </a>
   </div>
 </li>

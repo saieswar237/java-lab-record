@@ -2,23 +2,25 @@
 import { labInfo, totalWeeks } from '../data/labData';
 ---
 
-<footer class="no-print border-t border-rule mt-20">
-  <div class="mx-auto w-full max-w-[76rem] px-4 sm:px-6 lg:px-8 py-8">
-    <p class="font-mono text-sm text-muted">
-      <span class="text-ink">{labInfo.rollNumber}</span>
+<footer class="no-print border-t border-rule mt-24">
+  <div class="mx-auto w-full max-w-[76rem] px-4 sm:px-6 lg:px-8 py-10">
+    {/* A dedicatory inscription: who, where, under whom. */}
+    <p class="inscription text-ink">
+      {labInfo.rollNumber}
       <span aria-hidden="true"> · </span>
       {labInfo.student}
-      <span aria-hidden="true"> · </span>
+    </p>
+    <p class="inscription mt-2">
       {labInfo.labName}
       <span aria-hidden="true"> · </span>
       {labInfo.courseCode}
+      <span aria-hidden="true"> · </span>
+      {totalWeeks} experiments
     </p>
-    <p class="font-mono text-sm text-muted mt-1">
+    <p class="inscription mt-2">
       {labInfo.institution}
       <span aria-hidden="true"> · </span>
       Instructor: {labInfo.instructor} Sir
-      <span aria-hidden="true"> · </span>
-      {totalWeeks} experiments
     </p>
   </div>
 </footer>
