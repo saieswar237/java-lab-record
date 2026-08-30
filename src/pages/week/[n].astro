@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
-import WeekRail from '../../components/WeekRail.astro';
+import Facade from '../../components/Facade.astro';
 import PdfViewer from '../../components/PdfViewer.astro';
 import CodeBlock from '../../components/CodeBlock.astro';
 import ConsoleBlock from '../../components/ConsoleBlock.astro';
@@ -40,132 +40,116 @@ const description = `Week ${experiment.week} of the ${labInfo.labName} record ($
       <p class="font-mono text-sm">
         {labInfo.student} · {labInfo.rollNumber} · Instructor: {labInfo.instructor} Sir
       </p>
-      <p class="font-mono text-sm mt-2">
-        Week {n} — {experiment.title}
-      </p>
+      <p class="font-mono text-sm mt-2">Week {n} — {experiment.title}</p>
     </div>
 
-    <nav class="no-print mb-6" aria-label="Breadcrumb">
-      <ol class="list-none m-0 p-0 flex items-center gap-2 font-mono text-sm text-muted">
-        <li><a href={withBase()} class="hover:text-keyword">Records</a></li>
-        <li aria-hidden="true">/</li>
+    <nav class="no-print mb-8" aria-label="Breadcrumb">
+      <ol class="list-none m-0 p-0 flex items-center gap-3 inscription">
+        <li><a href={withBase()} class="hover:text-accent">Records</a></li>
+        <li aria-hidden="true">·</li>
         <li aria-current="page" class="text-ink">Week {n}</li>
       </ol>
     </nav>
 
-    <WeekRail current={experiment.week} variant="strip" />
+    {/* You are standing at column N of eight. */}
+    <div class="max-w-[44rem]">
+      <Facade current={experiment.week} height="4rem" />
+    </div>
 
-    <div class="flex gap-8">
-      <WeekRail current={experiment.week} variant="sidebar" />
-
-      <article class="min-w-0 flex-1 pb-8">
-        <p class="font-mono text-sm text-keyword">@week {n}</p>
-        <h1 class="mt-2 font-display text-[1.3rem] sm:text-display-l leading-[1.2] sm:leading-[1.15] tracking-[-0.025em] break-words hyphens-auto">
+    <article class="mt-14 pb-8">
+      <header>
+        <p class="inscription text-accent">Week {n}</p>
+        <h1 class="mt-3 font-display font-semibold text-[1.5rem] sm:text-display-l leading-[1.25] tracking-[0.03em] break-words">
           {experiment.title}
         </h1>
+      </header>
 
-        <section class="mt-8" aria-labelledby="aim-heading">
-          <h2
-            id="aim-heading"
-            class="font-mono text-meta uppercase text-muted border-b border-rule pb-2"
-          >
-            Aim
-          </h2>
-          <p class="mt-3 max-w-measure text-base">{experiment.aim}</p>
-        </section>
+      <section class="mt-12" aria-labelledby="aim-heading" data-reveal>
+        <h2 id="aim-heading" class="inscription border-b border-rule pb-3">Aim</h2>
+        <p class="mt-5 max-w-measure text-base">{experiment.aim}</p>
+      </section>
 
-        {
-          experiment.concepts.length > 0 && (
-            <section class="mt-8" aria-labelledby="concepts-heading">
-              <h2
-                id="concepts-heading"
-                class="font-mono text-meta uppercase text-muted border-b border-rule pb-2"
-              >
-                Concepts
-              </h2>
-              <ul class="list-none m-0 p-0 mt-3 flex flex-wrap gap-2">
-                {experiment.concepts.map((c) => (
-                  <li class="chip">{c}</li>
-                ))}
-              </ul>
-            </section>
-          )
-        }
+      {
+        experiment.concepts.length > 0 && (
+          <section class="mt-12" aria-labelledby="concepts-heading" data-reveal>
+            <h2 id="concepts-heading" class="inscription border-b border-rule pb-3">
+              Concepts
+            </h2>
+            <ul class="list-none m-0 p-0 mt-5 flex flex-wrap gap-2.5">
+              {experiment.concepts.map((c) => (
+                <li class="chip">{c}</li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
 
-        <section class="mt-10" aria-labelledby="record-heading">
-          <h2
-            id="record-heading"
-            class="font-mono text-meta uppercase text-muted border-b border-rule pb-2 mb-4"
-          >
-            Record
-          </h2>
-          <PdfViewer experiment={experiment} bound={bound} />
-        </section>
+      <section class="mt-14" aria-labelledby="record-heading" data-reveal>
+        <h2 id="record-heading" class="inscription border-b border-rule pb-3 mb-6">
+          Record
+        </h2>
+        <PdfViewer experiment={experiment} bound={bound} />
+      </section>
 
-        {
-          experiment.sourceCode && (
-            <section class="mt-10" aria-labelledby="source-heading">
-              <h2
-                id="source-heading"
-                class="font-mono text-meta uppercase text-muted border-b border-rule pb-2 mb-4"
-              >
-                Source
-              </h2>
-              <CodeBlock
-                code={experiment.sourceCode}
-                filename={entryClass ? `${entryClass}.java` : 'Source.java'}
-              />
-            </section>
-          )
-        }
+      {
+        experiment.sourceCode && (
+          <section class="mt-14" aria-labelledby="source-heading" data-reveal>
+            <h2 id="source-heading" class="inscription border-b border-rule pb-3 mb-6">
+              Source
+            </h2>
+            <CodeBlock
+              code={experiment.sourceCode}
+              filename={entryClass ? `${entryClass}.java` : 'Source.java'}
+            />
+          </section>
+        )
+      }
 
-        {
-          experiment.sampleOutput && (
-            <section class="mt-10" aria-labelledby="output-heading">
-              <h2
-                id="output-heading"
-                class="font-mono text-meta uppercase text-muted border-b border-rule pb-2 mb-4"
-              >
-                Output
-              </h2>
-              <ConsoleBlock output={experiment.sampleOutput} command={command} />
-            </section>
-          )
-        }
+      {
+        experiment.sampleOutput && (
+          <section class="mt-14" aria-labelledby="output-heading" data-reveal>
+            <h2 id="output-heading" class="inscription border-b border-rule pb-3 mb-6">
+              Output
+            </h2>
+            <ConsoleBlock output={experiment.sampleOutput} command={command} />
+          </section>
+        )
+      }
 
-        {/* --- Sequence navigation ---------------------------------------- */}
-        <nav
-          class="no-print mt-14 pt-6 border-t border-rule grid grid-cols-2 gap-4"
-          aria-label="Adjacent weeks"
-        >
-          <div>
-            {
-              prev ? (
-                <a href={weekHref(prev.week)} class="group block">
-                  <span class="font-mono text-sm text-muted">← Week {String(prev.week).padStart(2, '0')}</span>
-                  <span class="mt-1 block text-sm group-hover:text-keyword">{prev.title}</span>
-                </a>
-              ) : (
-                <p class="font-mono text-sm text-muted">Week {n} is the first record.</p>
-              )
-            }
-          </div>
-          <div class="text-right">
-            {
-              next ? (
-                <a href={weekHref(next.week)} class="group block">
-                  <span class="font-mono text-sm text-muted">Week {String(next.week).padStart(2, '0')} →</span>
-                  <span class="mt-1 block text-sm group-hover:text-keyword">{next.title}</span>
-                </a>
-              ) : (
-                <p class="font-mono text-sm text-muted">
-                  Week {n} is the last of {totalWeeks}.
-                </p>
-              )
-            }
-          </div>
-        </nav>
-      </article>
-    </div>
+      {/* --- Sequence navigation ---------------------------------------- */}
+      <nav
+        class="no-print mt-20 pt-8 border-t border-rule grid grid-cols-2 gap-6"
+        aria-label="Adjacent weeks"
+      >
+        <div>
+          {
+            prev ? (
+              <a href={weekHref(prev.week)} class="group block">
+                <span class="inscription">← Week {String(prev.week).padStart(2, '0')}</span>
+                <span class="mt-2 block font-serif text-base group-hover:text-accent">
+                  {prev.title}
+                </span>
+              </a>
+            ) : (
+              <p class="inscription">Week {n} is the first record</p>
+            )
+          }
+        </div>
+        <div class="text-right">
+          {
+            next ? (
+              <a href={weekHref(next.week)} class="group block">
+                <span class="inscription">Week {String(next.week).padStart(2, '0')} →</span>
+                <span class="mt-2 block font-serif text-base group-hover:text-accent">
+                  {next.title}
+                </span>
+              </a>
+            ) : (
+              <p class="inscription">Week {n} is the last of {totalWeeks}</p>
+            )
+          }
+        </div>
+      </nav>
+    </article>
   </div>
 </Base>

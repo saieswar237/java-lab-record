@@ -20,13 +20,13 @@ const pageLabel = experiment.pages
     /* The record for this week has not been bound yet. Say so plainly and
        point at what to do about it, rather than embedding a dead frame. */
     <section
-      class="border border-dashed border-rule rounded-[4px] p-8 sm:p-10 text-center"
+      class="border border-dashed border-rule p-10 sm:p-14 text-center"
       aria-labelledby="record-missing"
     >
-      <p id="record-missing" class="font-display text-lg text-ink">
+      <p id="record-missing" class="font-display font-semibold text-lg text-ink tracking-[0.04em]">
         Week {experiment.week} record not uploaded yet
       </p>
-      <p class="mt-3 text-sm text-muted max-w-measure mx-auto">
+      <p class="mt-4 text-base text-muted max-w-measure mx-auto">
         The scanned record for this experiment is not in the repository. Add
         <code class="font-mono text-ink">{experiment.pdf}</code> to
         <code class="font-mono text-ink">public/records/</code> and rebuild to
@@ -44,7 +44,7 @@ const pageLabel = experiment.pages
       {/* Toolbar. Always rendered, works without scripting. */}
       <figcaption
         id={`record-caption-${experiment.week}`}
-        class="flex flex-wrap items-center justify-between gap-3 border border-rule border-b-0 rounded-t-[4px] bg-surface px-4 py-3"
+        class="flex flex-wrap items-center justify-between gap-3 border border-rule border-b-0 bg-surface px-5 py-4"
       >
         <span class="font-mono text-sm text-muted">
           <span class="text-ink">{experiment.pdf}</span>
@@ -88,7 +88,7 @@ const pageLabel = experiment.pages
       </figcaption>
 
       <div
-        class="pdf-frame relative border border-rule rounded-b-[4px] overflow-hidden bg-surface"
+        class="pdf-frame relative border border-rule overflow-hidden"
         data-frame
       >
         {/* Default state. Every browser can render this, including the ones
@@ -96,8 +96,8 @@ const pageLabel = experiment.pages
             an inline viewer on large viewports. */}
         <div class="pdf-fallback p-6 sm:p-8" data-fallback>
           <p class="font-mono text-base text-ink break-all">{experiment.pdf}</p>
-          {pageLabel && <p class="mt-1 font-mono text-sm text-muted">{pageLabel}</p>}
-          <p class="mt-3 text-sm text-muted max-w-measure" data-fallback-copy>
+          {pageLabel && <p class="inscription mt-2">{pageLabel}</p>}
+          <p class="mt-4 text-base text-muted max-w-measure" data-fallback-copy>
             Open the record in your PDF viewer, or download a copy to keep.
           </p>
           <div class="no-print mt-5 flex flex-wrap gap-3">
@@ -115,7 +115,7 @@ const pageLabel = experiment.pages
           data-loading
           role="status"
         >
-          <p class="font-mono text-sm text-muted">Loading record…</p>
+          <p class="inscription">Loading record…</p>
         </div>
       </div>
     </figure>

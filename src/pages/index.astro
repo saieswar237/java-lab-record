@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import WeekCard from '../components/WeekCard.astro';
+import Facade from '../components/Facade.astro';
 import { experiments, labInfo, totalWeeks } from '../data/labData';
 import { recordExists } from '../lib/records';
 
@@ -8,11 +9,10 @@ const rows = experiments.map((e) => ({ experiment: e, bound: recordExists(e.pdf)
 const boundCount = rows.filter((r) => r.bound).length;
 
 const identity = [
-  { tag: '@student', value: labInfo.student },
-  { tag: '@roll', value: labInfo.rollNumber },
-  { tag: '@course', value: labInfo.courseCode },
-  { tag: '@institution', value: labInfo.institution },
-  { tag: '@instructor', value: `${labInfo.instructor} Sir` },
+  { label: 'Student', value: labInfo.student },
+  { label: 'Roll number', value: labInfo.rollNumber },
+  { label: 'Institution', value: labInfo.institution },
+  { label: 'Instructor', value: `${labInfo.instructor} Sir` },
 ];
 
 const description = `${labInfo.labName} (${labInfo.courseCode}) record of ${totalWeeks} weekly experiments by ${labInfo.student}, roll number ${labInfo.rollNumber}, ${labInfo.institution}.`;
@@ -29,64 +29,59 @@ const description = `${labInfo.labName} (${labInfo.courseCode}) record of ${tota
       </p>
     </div>
 
-    {/* --- Identity, written as the javadoc header of the record ---------- */}
-    <header class="pt-10 sm:pt-16 pb-10">
-      <p class="javadoc-mark mb-3">/**</p>
+    {/* --- The dedication ------------------------------------------------ */}
+    <header class="pt-12 sm:pt-20 max-w-[54rem]">
+      <p class="inscription">Record of practical work</p>
 
-      {/* Each line carries its own asterisk, so the block reads as the
-          javadoc header it is rather than as decoration. */}
-      <h1 class="jd-line font-display text-[2.125rem] sm:text-display-xl leading-[1.05] tracking-[-0.03em]">
+      <h1 class="mt-4 font-display font-semibold text-[2.5rem] sm:text-display-xl leading-[1.1] tracking-[0.04em]">
         {labInfo.labName}
       </h1>
 
-      <dl class="mt-5 grid grid-cols-[7.9rem_minmax(0,1fr)] sm:grid-cols-[9rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 m-0">
+      <p class="inscription mt-4 text-accent">{labInfo.courseCode}</p>
+
+      <dl class="mt-10 grid grid-cols-[7.5rem_minmax(0,1fr)] sm:grid-cols-[9.5rem_minmax(0,1fr)] gap-x-5 gap-y-3 pt-8 border-t border-rule m-0">
         {
           identity.map((row) => (
             <>
-              <dt class="jd-line font-mono text-sm text-keyword">{row.tag}</dt>
-              <dd class="font-mono text-sm text-ink m-0">{row.value}</dd>
+              <dt class="inscription pt-1">{row.label}</dt>
+              <dd class="font-serif text-base text-ink m-0">{row.value}</dd>
             </>
           ))
         }
       </dl>
-
-      <p class="javadoc-mark mt-4 pl-[0.3rem]">*/</p>
-
-      <p class="mt-8 max-w-measure text-base text-muted">
-        Eight weekly experiments, compiled, run and recorded. Each week opens to
-        its own page with the signed record embedded in full.
-      </p>
     </header>
 
+    {/* --- The facade: eight columns, one per week ----------------------- */}
+    <section class="mt-16 max-w-[44rem]" aria-labelledby="facade-heading">
+      <h2 id="facade-heading" class="sr-only">The eight experiments at a glance</h2>
+      <Facade height="7rem" animate />
+    </section>
+
+    <p class="mt-12 max-w-measure text-base text-muted">
+      Eight weekly experiments, performed, recorded and bound. Each column above
+      stands for one week; each opens to its own page with the record embedded
+      in full.
+    </p>
+
     {/* --- Filter -------------------------------------------------------- */}
-    <div class="no-print max-w-[54rem] flex flex-wrap items-end justify-between gap-4 border-t border-rule pt-6">
+    <div class="no-print max-w-[54rem] mt-14 flex flex-wrap items-end justify-between gap-4 border-t border-rule pt-8">
       <div class="w-full sm:w-auto sm:min-w-[22rem]">
-        <label for="week-search" class="block font-mono text-meta uppercase text-muted mb-2">
-          Filter experiments
-        </label>
+        <label for="week-search" class="inscription block mb-3">Filter experiments</label>
         <input
           id="week-search"
           type="search"
           autocomplete="off"
           placeholder="Search by title or keyword"
-          class="w-full bg-surface border border-rule rounded-[3px] px-3 py-2.5 font-mono text-sm text-ink placeholder:text-muted"
+          class="w-full bg-surface border border-rule px-3.5 py-3 font-serif text-base text-ink placeholder:text-muted"
         />
       </div>
-      <p class="font-mono text-sm text-muted" id="week-count" aria-live="polite">
+      <p class="inscription" id="week-count" aria-live="polite">
         {boundCount} of {totalWeeks} records bound
       </p>
     </div>
 
-    {/* --- The rail: framing, sequence and navigation in one -------------- */}
     <section class="mt-8 pb-4 max-w-[54rem]" aria-label="Weekly experiments">
-      <p
-        class="javadoc-mark w-[1.5rem] sm:w-[var(--rail-w)] text-center"
-        aria-hidden="true"
-      >
-        /**
-      </p>
-
-      <ol class="list-none m-0 p-0" id="week-list">
+      <ol class="list-none m-0 p-0 flex flex-col gap-4" id="week-list">
         {
           rows.map((row, i) => (
             <WeekCard experiment={row.experiment} bound={row.bound} index={i} />
@@ -94,14 +89,7 @@ const description = `${labInfo.labName} (${labInfo.courseCode}) record of ${tota
         }
       </ol>
 
-      <p
-        class="javadoc-mark w-[1.5rem] sm:w-[var(--rail-w)] text-center"
-        aria-hidden="true"
-      >
-        */
-      </p>
-
-      <p class="hidden mt-6 text-base text-muted" id="week-empty">
+      <p class="hidden mt-8 text-base text-muted" id="week-empty">
         No experiment matches that search. Clear the box to see all {totalWeeks}.
       </p>
     </section>

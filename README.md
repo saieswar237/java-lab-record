@@ -50,7 +50,7 @@ Two steps, no component edits.
 }
 ```
 
-The landing grid, the rail, the `/week/9/` route, prev/next navigation, the
+The landing grid, the facade, the `/week/9/` route, prev/next navigation, the
 search index, the About contents table and the page count all follow from that
 one object. `sourceCode` and `sampleOutput` are optional — omit them and those
 sections simply do not render.
@@ -85,6 +85,18 @@ and deploys it to GitHub Pages.
 If you name the repository something other than `java-lab-record`, change `base`
 in `astro.config.mjs` to match, or every asset URL will 404.
 
+## Design
+
+The site is built around one element: a facade of eight columns, one per week.
+It is not ornament — it carries the week sequence, marks which records are
+bound (bronze) against which are not, shows which week you are reading (blue),
+and every column is a link. It appears on the landing page and on every week
+page.
+
+Colours are quarried rather than printed: cool Pentelic marble, basalt ink,
+Aegean blue, and the verdigris of weathered bronze. Both light and dark are
+first-class, following the system preference unless the reader overrides it.
+
 ## How it is put together
 
 Astro, rather than a client-rendered SPA, because GitHub Pages has no rewrite
@@ -100,7 +112,8 @@ Three production dependencies, all pinned to exact versions:
 - **@astrojs/tailwind** — wires the two together
 
 Everything else is deliberate omission. Fonts are self-hosted `.woff2` files in
-`public/fonts/`. Icons are inline SVG. Java syntax highlighting is a ~50-line
+`public/fonts/` — Cinzel for inscriptional capitals, EB Garamond for reading,
+IBM Plex Mono for code. Icons are inline SVG. Java syntax highlighting is a ~50-line
 build-time function in `src/lib/java-highlight.ts` rather than a highlighting
 library, so the code blocks use the site's own colour tokens. The published site
 makes no network requests to anything outside itself.
@@ -119,7 +132,7 @@ src/
   layouts/
   lib/
   pages/             index, about, week/[n]
-  styles/global.css  colour tokens, rail, print rules
+  styles/global.css  colour tokens, the facade, print rules
 ```
 
 No week data is hardcoded anywhere outside `src/data/labData.ts`.

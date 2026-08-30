@@ -19,9 +19,9 @@ const ogImage = new URL(withBase('og-image.png'), Astro.site);
 // Self-hosted faces. Declared here rather than in the stylesheet so the URLs
 // resolve against the configured base path on GitHub Pages.
 const fonts = [
-  { family: 'Martian Mono', weight: 600, file: 'martian-mono-latin-600-normal.woff2' },
-  { family: 'IBM Plex Sans', weight: 400, file: 'ibm-plex-sans-latin-400-normal.woff2' },
-  { family: 'IBM Plex Sans', weight: 600, file: 'ibm-plex-sans-latin-600-normal.woff2' },
+  { family: 'Cinzel', weight: 600, file: 'cinzel-latin-600-normal.woff2' },
+  { family: 'EB Garamond', weight: 400, file: 'eb-garamond-latin-400-normal.woff2' },
+  { family: 'EB Garamond', weight: 600, file: 'eb-garamond-latin-600-normal.woff2' },
   { family: 'IBM Plex Mono', weight: 400, file: 'ibm-plex-mono-latin-400-normal.woff2' },
 ];
 
@@ -61,14 +61,14 @@ const fontCss = fonts
       as="font"
       type="font/woff2"
       crossorigin
-      href={withBase('fonts/ibm-plex-sans-latin-400-normal.woff2')}
+      href={withBase('fonts/eb-garamond-latin-400-normal.woff2')}
     />
     <link
       rel="preload"
       as="font"
       type="font/woff2"
       crossorigin
-      href={withBase('fonts/martian-mono-latin-600-normal.woff2')}
+      href={withBase('fonts/cinzel-latin-600-normal.woff2')}
     />
     <link
       rel="preload"
@@ -83,6 +83,7 @@ const fontCss = fonts
     {/* Resolve the stored theme before first paint so nothing flashes. */}
     <script is:inline>
       (function () {
+        document.documentElement.classList.add('js');
         try {
           var t = localStorage.getItem('theme');
           if (t === 'dark' || t === 'light') {
@@ -98,7 +99,7 @@ const fontCss = fonts
   <body class="min-h-screen flex flex-col">
     <a
       href="#main"
-      class="no-print sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-surface focus:text-ink focus:border focus:border-keyword focus:px-4 focus:py-2 focus:font-mono focus:text-sm"
+      class="no-print sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-surface focus:text-ink focus:border focus:border-accent focus:px-4 focus:py-2 focus:font-mono focus:text-sm"
     >
       Skip to content
     </a>
@@ -110,5 +111,52 @@ const fontCss = fonts
     </main>
 
     <Footer />
+
+    <script>
+      // Reveal sections as they come into view.
+      //
+      // Deliberately a scroll check rather than IntersectionObserver: this
+      // page's job is to be readable, and an observer that fires late (or
+      // not at all, as happens in a backgrounded tab) would leave a record
+      // invisible. This is deterministic — anything on screen is shown.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let pending = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+
+      const revealAll = () => {
+        pending.forEach((el) => el.classList.add('is-visible'));
+        pending = [];
+      };
+
+      if (reduced) {
+        revealAll();
+      } else {
+        let queued = false;
+
+        const check = () => {
+          queued = false;
+          const limit = window.innerHeight * 1.05;
+          pending = pending.filter((el) => {
+            if (el.getBoundingClientRect().top >= limit) return true;
+            el.classList.add('is-visible');
+            return false;
+          });
+          if (!pending.length) {
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
+          }
+        };
+
+        const onScroll = () => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(check);
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        window.addEventListener('load', check);
+        check();
+      }
+    </script>
   </body>
 </html>
