@@ -1,0 +1,114 @@
+---
+import '../styles/global.css';
+import { labInfo } from '../data/labData';
+import { withBase } from '../lib/paths';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
+const pageTitle = `${title} — ${labInfo.labName} ${labInfo.courseCode}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(withBase('og-image.png'), Astro.site);
+
+// Self-hosted faces. Declared here rather than in the stylesheet so the URLs
+// resolve against the configured base path on GitHub Pages.
+const fonts = [
+  { family: 'Martian Mono', weight: 600, file: 'martian-mono-latin-600-normal.woff2' },
+  { family: 'IBM Plex Sans', weight: 400, file: 'ibm-plex-sans-latin-400-normal.woff2' },
+  { family: 'IBM Plex Sans', weight: 600, file: 'ibm-plex-sans-latin-600-normal.woff2' },
+  { family: 'IBM Plex Mono', weight: 400, file: 'ibm-plex-mono-latin-400-normal.woff2' },
+];
+
+const fontCss = fonts
+  .map(
+    (f) => `@font-face{font-family:'${f.family}';font-style:normal;font-weight:${f.weight};font-display:swap;src:url('${withBase(
+      `fonts/${f.file}`
+    )}') format('woff2');}`
+  )
+  .join('');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+
+    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:image" content={ogImage.href} />
+    <meta property="og:site_name" content={`${labInfo.labName} Record — ${labInfo.rollNumber}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage.href} />
+
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href={withBase('fonts/ibm-plex-sans-latin-400-normal.woff2')}
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href={withBase('fonts/martian-mono-latin-600-normal.woff2')}
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href={withBase('fonts/ibm-plex-mono-latin-400-normal.woff2')}
+    />
+
+    <style is:inline set:html={fontCss}></style>
+
+    {/* Resolve the stored theme before first paint so nothing flashes. */}
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          if (t === 'dark' || t === 'light') {
+            document.documentElement.setAttribute('data-theme', t);
+          }
+        } catch (e) {
+          /* storage blocked; fall back to prefers-color-scheme */
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="min-h-screen flex flex-col">
+    <a
+      href="#main"
+      class="no-print sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-surface focus:text-ink focus:border focus:border-keyword focus:px-4 focus:py-2 focus:font-mono focus:text-sm"
+    >
+      Skip to content
+    </a>
+
+    <Nav />
+
+    <main id="main" class="flex-1 w-full">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

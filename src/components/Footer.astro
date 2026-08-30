@@ -1,0 +1,24 @@
+---
+import { labInfo, totalWeeks } from '../data/labData';
+---
+
+<footer class="no-print border-t border-rule mt-20">
+  <div class="mx-auto w-full max-w-[76rem] px-4 sm:px-6 lg:px-8 py-8">
+    <p class="font-mono text-sm text-muted">
+      <span class="text-ink">{labInfo.rollNumber}</span>
+      <span aria-hidden="true"> · </span>
+      {labInfo.student}
+      <span aria-hidden="true"> · </span>
+      {labInfo.labName}
+      <span aria-hidden="true"> · </span>
+      {labInfo.courseCode}
+    </p>
+    <p class="font-mono text-sm text-muted mt-1">
+      {labInfo.institution}
+      <span aria-hidden="true"> · </span>
+      Instructor: {labInfo.instructor} Sir
+      <span aria-hidden="true"> · </span>
+      {totalWeeks} experiments
+    </p>
+  </div>
+</footer>

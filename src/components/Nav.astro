@@ -1,0 +1,113 @@
+---
+import { labInfo } from '../data/labData';
+import { withBase } from '../lib/paths';
+
+const path = Astro.url.pathname.replace(/\/$/, '');
+const isAbout = path.endsWith('/about');
+// Only the landing page itself is "Records"; a week page is neither.
+const isHome = path === withBase().replace(/\/$/, '');
+---
+
+<nav
+  class="no-print border-b border-rule"
+  aria-label="Primary"
+>
+  <div class="mx-auto w-full max-w-[76rem] px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
+    <a
+      href={withBase()}
+      class="font-display text-sm tracking-tight hover:text-keyword"
+      aria-label={`${labInfo.labName} record home, roll number ${labInfo.rollNumber}`}
+    >
+      {labInfo.rollNumber}
+    </a>
+
+    <div class="flex items-center gap-1 sm:gap-2">
+      <a
+        href={withBase()}
+        class="font-mono text-sm px-2 py-1 hover:text-keyword"
+        aria-current={isHome ? 'page' : undefined}
+      >
+        Records
+      </a>
+      <a
+        href={withBase('about/')}
+        class="font-mono text-sm px-2 py-1 hover:text-keyword"
+        aria-current={isAbout ? 'page' : undefined}
+      >
+        About
+      </a>
+
+      <button
+        id="theme-toggle"
+        type="button"
+        class="ml-1 grid place-items-center w-9 h-9 border border-rule rounded-[3px] hover:border-keyword"
+        aria-label="Switch to dark theme"
+        aria-pressed="false"
+      >
+        <svg
+          data-icon="sun"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+        </svg>
+        <svg
+          data-icon="moon"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="hidden"
+          aria-hidden="true"
+        >
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+
+  const current = (): 'dark' | 'light' => {
+    const set = root.getAttribute('data-theme');
+    if (set === 'dark' || set === 'light') return set;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+
+  const paint = (theme: 'dark' | 'light') => {
+    const sun = btn?.querySelector<SVGElement>('[data-icon="sun"]');
+    const moon = btn?.querySelector<SVGElement>('[data-icon="moon"]');
+    const dark = theme === 'dark';
+    sun?.classList.toggle('hidden', dark);
+    moon?.classList.toggle('hidden', !dark);
+    btn?.setAttribute('aria-pressed', String(dark));
+    btn?.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+  };
+
+  paint(current());
+
+  btn?.addEventListener('click', () => {
+    const next = current() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* storage blocked; the choice just won't persist */
+    }
+    paint(next);
+  });
+</script>
