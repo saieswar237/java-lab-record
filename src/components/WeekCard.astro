@@ -10,7 +10,7 @@ interface Props {
 
 const { experiment, bound, index } = Astro.props;
 const n = String(experiment.week).padStart(2, '0');
-const stagger = `${120 + index * 60}ms`;
+const stagger = `${80 + index * 45}ms`;
 ---
 
 <li
