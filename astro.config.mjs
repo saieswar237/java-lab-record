@@ -1,9 +1,8 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 
-// CHANGE ME: replace `your-username` with your GitHub username.
-// Used only to build absolute Open Graph URLs.
-const GITHUB_USER = 'your-username';
+// GitHub username. Used only to build absolute Open Graph URLs.
+const GITHUB_USER = 'saieswar237';
 
 export default defineConfig({
   site: `https://${GITHUB_USER}.github.io`,
