@@ -1,0 +1,355 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------
+   Palette. Six roles, taken from Java syntax highlighting:
+   keyword blue, string green, and the console the program prints into.
+   Light is the default; dark is redefined in two places so that both the
+   system preference and an explicit toggle resolve correctly.
+   --------------------------------------------------------------------- */
+:root {
+  --ink: #151c24;
+  --ground: #dde1de;
+  --surface: #eef0ed;
+  --keyword: #2b34c8;
+  --string: #2e6b44;
+  --console: #0e1418;
+
+  /* derived */
+  --muted: #4a5560;
+  --rule: #c3c9c5;
+  --console-ink: #d6ded8;
+  --console-dim: #8b9a92;
+  --console-rule: #263038;
+
+  --rail-w: 2.75rem;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ink: #dde1de;
+    --ground: #10161c;
+    --surface: #19212a;
+    --keyword: #8e97ff;
+    --string: #6fbf8c;
+    --muted: #94a0ac;
+    --rule: #2b3640;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --ink: #dde1de;
+  --ground: #10161c;
+  --surface: #19212a;
+  --keyword: #8e97ff;
+  --string: #6fbf8c;
+  --muted: #94a0ac;
+  --rule: #2b3640;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* Always reserve the scrollbar, so mounting the PDF viewer cannot
+       narrow the page and nudge everything sideways. */
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background-color: var(--ground);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  /* One focus treatment, everywhere, always visible. */
+  :focus-visible {
+    outline: 2px solid var(--keyword);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--keyword);
+    color: var(--ground);
+  }
+}
+
+@layer components {
+  /* --- The javadoc rail: navigation, framing and progress in one -------- */
+  .rail-cell {
+    position: relative;
+  }
+
+  /* the vertical stem */
+  .rail-cell::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    transform: translateX(-50%);
+    background: var(--rule);
+  }
+
+  .rail-node {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid var(--muted);
+    background: var(--ground);
+  }
+
+  /* a week that has a record bound to it */
+  .rail-node[data-state='filled'] {
+    background: var(--string);
+    border-color: var(--string);
+  }
+
+  .rail-node[data-state='current'] {
+    background: var(--keyword);
+    border-color: var(--keyword);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--keyword) 22%, transparent);
+  }
+
+  .rail-node[data-state='empty'] {
+    background: var(--ground);
+    border-style: dashed;
+  }
+
+  /* A line inside a javadoc block: carries its own leading asterisk. */
+  .jd-line {
+    position: relative;
+    padding-left: 1.35rem;
+  }
+
+  .jd-line::before {
+    content: '*';
+    position: absolute;
+    left: 0.3rem;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.8125rem;
+    font-weight: 400;
+  }
+
+  .javadoc-mark {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.8125rem;
+    color: var(--muted);
+    line-height: 1;
+  }
+
+  /* --- Cards ----------------------------------------------------------- */
+  .week-card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    transition:
+      border-color 140ms ease,
+      transform 140ms ease;
+  }
+
+  .week-card:hover {
+    border-color: var(--keyword);
+    transform: translateX(2px);
+  }
+
+  /* Reserve the reading height up front: the iframe mounts into a box that
+     is already the right size, so nothing below it moves. */
+  @media (min-width: 768px) {
+    .pdf-frame {
+      min-height: min(82vh, 1100px);
+    }
+  }
+
+  /* --- The console: the only inverted surface on the site -------------- */
+  .console-block {
+    background: var(--console);
+    color: var(--console-ink);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+
+  .chip {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.8125rem;
+    line-height: 1;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.875rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 3px;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    transition:
+      border-color 140ms ease,
+      background-color 140ms ease;
+  }
+
+  .btn:hover {
+    border-color: var(--keyword);
+  }
+
+  .btn-primary {
+    background: var(--keyword);
+    border-color: var(--keyword);
+    color: var(--ground);
+  }
+
+  .btn-primary:hover {
+    background: var(--keyword);
+    filter: brightness(1.1);
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Motion. One orchestrated moment: the rail compiles on first paint.
+   --------------------------------------------------------------------- */
+@keyframes rail-land {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes node-fill {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.compile-in {
+  animation: rail-land 380ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+.compile-node {
+  animation: node-fill 260ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .compile-in,
+  .compile-node {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Print. Someone will print this record; give them a clean header and
+   nothing else.
+   --------------------------------------------------------------------- */
+.print-header {
+  display: none;
+}
+
+@media print {
+  :root {
+    --ink: #000000;
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --muted: #333333;
+    --rule: #999999;
+    --keyword: #000000;
+    --string: #000000;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  .no-print,
+  nav,
+  footer,
+  .btn,
+  .rail-cell,
+  .pdf-frame,
+  .pdf-fallback {
+    display: none !important;
+  }
+
+  .print-header {
+    display: block;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1.5pt solid #000;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .console-block {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1pt solid #999;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+
+  @page {
+    margin: 16mm;
+  }
+}
