@@ -1,0 +1,153 @@
+---
+import Base from '../layouts/Base.astro';
+import WeekCard from '../components/WeekCard.astro';
+import { experiments, labInfo, totalWeeks } from '../data/labData';
+import { recordExists } from '../lib/records';
+
+const rows = experiments.map((e) => ({ experiment: e, bound: recordExists(e.pdf) }));
+const boundCount = rows.filter((r) => r.bound).length;
+
+const identity = [
+  { tag: '@student', value: labInfo.student },
+  { tag: '@roll', value: labInfo.rollNumber },
+  { tag: '@course', value: labInfo.courseCode },
+  { tag: '@institution', value: labInfo.institution },
+  { tag: '@instructor', value: `${labInfo.instructor} Sir` },
+];
+
+const description = `${labInfo.labName} (${labInfo.courseCode}) record of ${totalWeeks} weekly experiments by ${labInfo.student}, roll number ${labInfo.rollNumber}, ${labInfo.institution}.`;
+---
+
+<Base title={`${labInfo.labName} Record`} description={description}>
+  <div class="mx-auto w-full max-w-[76rem] px-4 sm:px-6 lg:px-8">
+    <div class="print-header">
+      <p class="font-mono text-sm">
+        {labInfo.institution} · {labInfo.labName} · {labInfo.courseCode}
+      </p>
+      <p class="font-mono text-sm">
+        {labInfo.student} · {labInfo.rollNumber} · Instructor: {labInfo.instructor} Sir
+      </p>
+    </div>
+
+    {/* --- Identity, written as the javadoc header of the record ---------- */}
+    <header class="pt-10 sm:pt-16 pb-10">
+      <p class="javadoc-mark mb-3">/**</p>
+
+      {/* Each line carries its own asterisk, so the block reads as the
+          javadoc header it is rather than as decoration. */}
+      <h1 class="jd-line font-display text-[2.125rem] sm:text-display-xl leading-[1.05] tracking-[-0.03em]">
+        {labInfo.labName}
+      </h1>
+
+      <dl class="mt-5 grid grid-cols-[7rem_minmax(0,1fr)] sm:grid-cols-[9rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 m-0">
+        {
+          identity.map((row) => (
+            <>
+              <dt class="jd-line font-mono text-sm text-keyword">{row.tag}</dt>
+              <dd class="font-mono text-sm text-ink m-0">{row.value}</dd>
+            </>
+          ))
+        }
+      </dl>
+
+      <p class="javadoc-mark mt-4 pl-[0.3rem]">*/</p>
+
+      <p class="mt-8 max-w-measure text-base text-muted">
+        Eight weekly experiments, compiled, run and recorded. Each week opens to
+        its own page with the signed record embedded in full.
+      </p>
+    </header>
+
+    {/* --- Filter -------------------------------------------------------- */}
+    <div class="no-print flex flex-wrap items-end justify-between gap-4 border-t border-rule pt-6">
+      <div class="w-full sm:w-auto sm:min-w-[22rem]">
+        <label for="week-search" class="block font-mono text-meta uppercase text-muted mb-2">
+          Filter experiments
+        </label>
+        <input
+          id="week-search"
+          type="search"
+          autocomplete="off"
+          placeholder="Search by title or keyword"
+          class="w-full bg-surface border border-rule rounded-[3px] px-3 py-2.5 font-mono text-sm text-ink placeholder:text-muted"
+        />
+      </div>
+      <p class="font-mono text-sm text-muted" id="week-count" aria-live="polite">
+        {boundCount} of {totalWeeks} records bound
+      </p>
+    </div>
+
+    {/* --- The rail: framing, sequence and navigation in one -------------- */}
+    <section class="mt-8 pb-4" aria-label="Weekly experiments">
+      <p
+        class="javadoc-mark w-[1.5rem] sm:w-[var(--rail-w)] text-center"
+        aria-hidden="true"
+      >
+        /**
+      </p>
+
+      <ol class="list-none m-0 p-0" id="week-list">
+        {
+          rows.map((row, i) => (
+            <WeekCard experiment={row.experiment} bound={row.bound} index={i} />
+          ))
+        }
+      </ol>
+
+      <p
+        class="javadoc-mark w-[1.5rem] sm:w-[var(--rail-w)] text-center"
+        aria-hidden="true"
+      >
+        */
+      </p>
+
+      <p class="hidden mt-6 text-base text-muted" id="week-empty">
+        No experiment matches that search. Clear the box to see all {totalWeeks}.
+      </p>
+    </section>
+  </div>
+</Base>
+
+<script>
+  const input = document.getElementById('week-search') as HTMLInputElement | null;
+  const list = document.getElementById('week-list');
+  const count = document.getElementById('week-count');
+  const empty = document.getElementById('week-empty');
+
+  if (input && list && count && empty) {
+    const rows = Array.from(list.querySelectorAll<HTMLLIElement>('.week-row'));
+    const total = rows.length;
+    const initial = count.textContent ?? '';
+
+    const filter = () => {
+      const q = input.value.trim().toLowerCase();
+
+      if (!q) {
+        rows.forEach((r) => r.classList.remove('hidden'));
+        count.textContent = initial;
+        empty.classList.add('hidden');
+        return;
+      }
+
+      let shown = 0;
+      for (const row of rows) {
+        const hay = [
+          row.dataset.title ?? '',
+          row.dataset.concepts ?? '',
+          row.dataset.aim ?? '',
+          `week ${row.dataset.week ?? ''}`,
+        ].join(' ');
+        const match = hay.includes(q);
+        row.classList.toggle('hidden', !match);
+        if (match) shown++;
+      }
+
+      count.textContent = `${shown} of ${total} shown`;
+      empty.classList.toggle('hidden', shown > 0);
+    };
+
+    input.addEventListener('input', filter);
+    // A restored value after a back-navigation should still filter.
+    if (input.value) filter();
+  }
+</script>
