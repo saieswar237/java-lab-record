@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Java Lab record">
+  <style>
+    .bg { fill: #dde1de; }
+    .stem { stroke: #4a5560; }
+    .done { fill: #2e6b44; }
+    .here { fill: #2b34c8; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #10161c; }
+      .stem { stroke: #94a0ac; }
+      .done { fill: #6fbf8c; }
+      .here { fill: #8e97ff; }
+    }
+  </style>
+  <rect class="bg" width="32" height="32" rx="6" />
+  <line class="stem" x1="16" y1="6" x2="16" y2="26" stroke-width="1.5" />
+  <circle class="done" cx="16" cy="8" r="3.25" />
+  <circle class="done" cx="16" cy="16" r="3.25" />
+  <circle class="here" cx="16" cy="24" r="3.75" />
+</svg>

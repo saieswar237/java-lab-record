@@ -1,0 +1,146 @@
+---
+import Base from '../layouts/Base.astro';
+import { experiments, labInfo, totalWeeks } from '../data/labData';
+import { recordExists } from '../lib/records';
+import { weekHref } from '../lib/paths';
+
+const rows = experiments.map((e) => ({
+  ...e,
+  bound: recordExists(e.pdf),
+}));
+
+const totalPages = rows.reduce((sum, r) => sum + (r.bound ? (r.pages ?? 0) : 0), 0);
+
+const details = [
+  { label: 'Institution', value: labInfo.institution },
+  { label: 'Laboratory', value: labInfo.labName },
+  { label: 'Course code', value: labInfo.courseCode },
+  { label: 'Instructor', value: `${labInfo.instructor} Sir` },
+  { label: 'Student', value: labInfo.student },
+  { label: 'Roll number', value: labInfo.rollNumber },
+  { label: 'Experiments', value: `${totalWeeks} (Week 1 – Week ${totalWeeks})` },
+];
+
+const description = `Course, instructor and institution details for the ${labInfo.labName} record (${labInfo.courseCode}) of ${labInfo.student}, roll number ${labInfo.rollNumber}.`;
+---
+
+<Base title="About this record" description={description}>
+  <div class="mx-auto w-full max-w-[76rem] px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 pb-8">
+    <div class="print-header">
+      <p class="font-mono text-sm">
+        {labInfo.institution} · {labInfo.labName} · {labInfo.courseCode}
+      </p>
+      <p class="font-mono text-sm">
+        {labInfo.student} · {labInfo.rollNumber} · Instructor: {labInfo.instructor} Sir
+      </p>
+    </div>
+
+    <p class="javadoc-mark mb-4">/**</p>
+    <h1 class="font-display text-[1.75rem] sm:text-display-l leading-[1.15] tracking-[-0.025em]">
+      About this record
+    </h1>
+    <p class="javadoc-mark mt-4">*/</p>
+
+    <div class="mt-10 grid gap-14 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <section aria-labelledby="details-heading">
+        <h2
+          id="details-heading"
+          class="font-mono text-meta uppercase text-muted border-b border-rule pb-2"
+        >
+          Details
+        </h2>
+        <dl class="mt-4 grid grid-cols-[9rem_1fr] gap-x-4 gap-y-2.5">
+          {
+            details.map((d) => (
+              <>
+                <dt class="font-mono text-sm text-muted">{d.label}</dt>
+                <dd class="m-0 text-sm">{d.value}</dd>
+              </>
+            ))
+          }
+        </dl>
+      </section>
+
+      <div class="min-w-0">
+        <section aria-labelledby="organised-heading">
+          <h2
+            id="organised-heading"
+            class="font-mono text-meta uppercase text-muted border-b border-rule pb-2"
+          >
+            How the record is organised
+          </h2>
+          <p class="mt-4 max-w-measure text-base">
+            The lab runs across {totalWeeks} weeks. Each week has one page here,
+            carrying the aim of the experiment, the concepts it covers, and the
+            scanned record itself embedded in full. Weeks are numbered in the
+            order they were performed, so the set reads as a sequence rather
+            than a collection.
+          </p>
+          <p class="mt-4 max-w-measure text-base">
+            The records were bound from a single submitted document and split
+            back into {totalWeeks} files, {totalPages} pages in total. Where an
+            experiment begins partway down a page, that page appears in both of
+            the weeks it belongs to rather than being cut in half.
+          </p>
+        </section>
+
+        <section class="mt-12" aria-labelledby="contents-heading">
+          <h2
+            id="contents-heading"
+            class="font-mono text-meta uppercase text-muted border-b border-rule pb-2"
+          >
+            Contents
+          </h2>
+          <ol class="list-none m-0 p-0 mt-4">
+            {
+              rows.map((r) => (
+                <li class="grid grid-cols-[2.5rem_1fr_auto] gap-3 items-baseline py-2.5 border-b border-rule">
+                  <span class="font-display text-sm text-keyword">
+                    {String(r.week).padStart(2, '0')}
+                  </span>
+                  <a href={weekHref(r.week)} class="text-sm hover:text-keyword">
+                    {r.title}
+                  </a>
+                  <span class="font-mono text-sm text-muted whitespace-nowrap">
+                    {r.bound ? `${r.pages ?? '—'} pp` : 'not uploaded'}
+                  </span>
+                </li>
+              ))
+            }
+          </ol>
+        </section>
+
+        <section class="mt-12" aria-labelledby="reading-heading">
+          <h2
+            id="reading-heading"
+            class="font-mono text-meta uppercase text-muted border-b border-rule pb-2"
+          >
+            Reading the records
+          </h2>
+          <p class="mt-4 max-w-measure text-base">
+            On a desktop browser each record is embedded in its week page and can
+            be read without leaving the site. On phones and tablets, where
+            browsers commonly refuse to display a framed PDF, the page offers the
+            file to open or download instead. Every record can be downloaded from
+            its own page.
+          </p>
+        </section>
+
+        <section class="mt-12" aria-labelledby="colophon-heading">
+          <h2
+            id="colophon-heading"
+            class="font-mono text-meta uppercase text-muted border-b border-rule pb-2"
+          >
+            Colophon
+          </h2>
+          <p class="mt-4 max-w-measure text-base">
+            Built as a static site with Astro and Tailwind CSS, and served from
+            GitHub Pages. Set in Martian Mono, IBM Plex Sans and IBM Plex Mono,
+            all self-hosted. The site makes no network requests to anything
+            outside itself.
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</Base>
