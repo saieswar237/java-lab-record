@@ -1,0 +1,191 @@
+---
+import type { Experiment } from '../data/labData';
+import { recordHref } from '../lib/paths';
+
+interface Props {
+  experiment: Experiment;
+  bound: boolean;
+}
+
+const { experiment, bound } = Astro.props;
+const href = recordHref(experiment.pdf);
+const label = `Week ${experiment.week} record — ${experiment.title} (PDF)`;
+const pageLabel = experiment.pages
+  ? `${experiment.pages} ${experiment.pages === 1 ? 'page' : 'pages'}`
+  : null;
+---
+
+{
+  !bound ? (
+    /* The record for this week has not been bound yet. Say so plainly and
+       point at what to do about it, rather than embedding a dead frame. */
+    <section
+      class="border border-dashed border-rule rounded-[4px] p-8 sm:p-10 text-center"
+      aria-labelledby="record-missing"
+    >
+      <p id="record-missing" class="font-display text-lg text-ink">
+        Week {experiment.week} record not uploaded yet
+      </p>
+      <p class="mt-3 text-sm text-muted max-w-measure mx-auto">
+        The scanned record for this experiment is not in the repository. Add
+        <code class="font-mono text-ink">{experiment.pdf}</code> to
+        <code class="font-mono text-ink">public/records/</code> and rebuild to
+        publish it here.
+      </p>
+    </section>
+  ) : (
+    <figure
+      class="m-0"
+      data-pdf-viewer
+      data-src={href}
+      data-label={label}
+      aria-labelledby={`record-caption-${experiment.week}`}
+    >
+      {/* Toolbar. Always rendered, works without scripting. */}
+      <figcaption
+        id={`record-caption-${experiment.week}`}
+        class="flex flex-wrap items-center justify-between gap-3 border border-rule border-b-0 rounded-t-[4px] bg-surface px-4 py-3"
+      >
+        <span class="font-mono text-sm text-muted">
+          <span class="text-ink">{experiment.pdf}</span>
+          {pageLabel && <span> · {pageLabel}</span>}
+        </span>
+
+        <span class="no-print hidden md:flex flex-wrap items-center gap-2">
+          <a class="btn" href={href} download={experiment.pdf}>
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3v12M7 11l5 5 5-5M4 20h16" />
+            </svg>
+            Download
+          </a>
+          <a class="btn" href={href} target="_blank" rel="noopener">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+            </svg>
+            Open in new tab
+          </a>
+        </span>
+      </figcaption>
+
+      <div
+        class="pdf-frame relative border border-rule rounded-b-[4px] overflow-hidden bg-surface"
+        data-frame
+      >
+        {/* Default state. Every browser can render this, including the ones
+            that refuse to show a PDF in an iframe. Scripting upgrades it to
+            an inline viewer on large viewports. */}
+        <div class="pdf-fallback p-6 sm:p-8" data-fallback>
+          <p class="font-mono text-base text-ink break-all">{experiment.pdf}</p>
+          {pageLabel && <p class="mt-1 font-mono text-sm text-muted">{pageLabel}</p>}
+          <p class="mt-3 text-sm text-muted max-w-measure" data-fallback-copy>
+            Open the record in your PDF viewer, or download a copy to keep.
+          </p>
+          <div class="no-print mt-5 flex flex-wrap gap-3">
+            <a class="btn btn-primary" href={href} target="_blank" rel="noopener">
+              Open PDF
+            </a>
+            <a class="btn" href={href} download={experiment.pdf}>
+              Download
+            </a>
+          </div>
+        </div>
+
+        <div
+          class="hidden absolute inset-0 grid place-items-center bg-surface"
+          data-loading
+          role="status"
+        >
+          <p class="font-mono text-sm text-muted">Loading record…</p>
+        </div>
+      </div>
+    </figure>
+  )
+}
+
+<script>
+  type Viewer = HTMLElement;
+
+  // iPadOS reports itself as a Mac, so treat a touch-capable Mac as iOS too.
+  const UA = navigator.userAgent;
+  const IOS =
+    /iPad|iPhone|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+
+  function mount(viewer: Viewer) {
+    const src = viewer.dataset.src;
+    const label = viewer.dataset.label ?? 'Lab record PDF';
+    const frame = viewer.querySelector<HTMLElement>('[data-frame]');
+    const fallback = viewer.querySelector<HTMLElement>('[data-fallback]');
+    const loading = viewer.querySelector<HTMLElement>('[data-loading]');
+    if (!src || !frame || !fallback || !loading) return;
+
+    // iOS Safari and several Android browsers render an empty box for a
+    // framed PDF. Those keep the fallback card, which is a real UI.
+    const embeddable = window.matchMedia('(min-width: 768px)').matches && !IOS;
+    if (!embeddable) return;
+
+    fallback.classList.add('hidden');
+    loading.classList.remove('hidden');
+    frame.style.height = 'min(82vh, 1100px)';
+
+    const iframe = document.createElement('iframe');
+    iframe.src = src;
+    iframe.title = label;
+    iframe.className = 'absolute inset-0 w-full h-full border-0';
+    iframe.setAttribute('loading', 'lazy');
+
+    let settled = false;
+
+    const succeed = () => {
+      if (settled) return;
+      settled = true;
+      loading.classList.add('hidden');
+    };
+
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      loading.classList.add('hidden');
+      iframe.remove();
+      frame.style.height = '';
+      fallback.classList.remove('hidden');
+      const copy = fallback.querySelector<HTMLElement>('[data-fallback-copy]');
+      if (copy) {
+        copy.textContent =
+          'This record could not be displayed in the page. Open or download it instead.';
+      }
+    };
+
+    iframe.addEventListener('load', succeed);
+    iframe.addEventListener('error', fail);
+
+    // Some browsers never fire load for a plugin-rendered PDF; treat a long
+    // silence as a failure so the reader is never left with a blank box.
+    const timer = window.setTimeout(fail, 6000);
+    iframe.addEventListener('load', () => window.clearTimeout(timer));
+
+    frame.appendChild(iframe);
+  }
+
+  document.querySelectorAll<Viewer>('[data-pdf-viewer]').forEach(mount);
+</script>

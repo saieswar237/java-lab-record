@@ -1,0 +1,70 @@
+---
+import { highlightJava } from '../lib/java-highlight';
+
+interface Props {
+  code: string;
+  filename?: string;
+}
+
+const { code, filename } = Astro.props;
+const html = highlightJava(code);
+---
+
+<div class="border border-rule rounded-[4px] overflow-hidden">
+  <div class="flex items-center justify-between gap-3 bg-surface border-b border-rule px-4 py-2">
+    <span class="font-mono text-sm text-muted">{filename ?? 'Source'}</span>
+    <button
+      type="button"
+      class="no-print btn !py-1 !px-2"
+      data-copy
+      data-code={code}
+      aria-label="Copy source code to clipboard"
+    >
+      <span data-copy-label>Copy</span>
+    </button>
+  </div>
+  <pre class="m-0 overflow-x-auto bg-surface px-4 py-4"><code
+      class="font-mono text-code block"
+      set:html={html}
+    /></pre>
+</div>
+
+<style>
+  :global(.tk-keyword) {
+    color: var(--keyword);
+    font-weight: 600;
+  }
+  :global(.tk-string) {
+    color: var(--string);
+  }
+  :global(.tk-comment) {
+    color: var(--muted);
+    font-style: italic;
+  }
+  :global(.tk-annotation) {
+    color: var(--muted);
+    font-weight: 600;
+  }
+  :global(.tk-number),
+  :global(.tk-type) {
+    color: var(--ink);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    const label = btn.querySelector<HTMLElement>('[data-copy-label]');
+    btn.addEventListener('click', async () => {
+      const code = btn.dataset.code ?? '';
+      try {
+        await navigator.clipboard.writeText(code);
+        if (label) label.textContent = 'Copied';
+      } catch {
+        if (label) label.textContent = 'Press Ctrl+C';
+      }
+      window.setTimeout(() => {
+        if (label) label.textContent = 'Copy';
+      }, 2000);
+    });
+  });
+</script>

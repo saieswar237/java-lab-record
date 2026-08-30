@@ -1,0 +1,21 @@
+---
+interface Props {
+  output: string;
+  command?: string;
+}
+
+const { output, command } = Astro.props;
+const prompt = command ? `$ ${command}\n` : '';
+---
+
+<div class="console-block">
+  <div class="flex items-center gap-2 px-4 py-2 border-b border-console-rule">
+    <span class="flex gap-1.5" aria-hidden="true">
+      <span class="w-2 h-2 rounded-full bg-console-rule"></span>
+      <span class="w-2 h-2 rounded-full bg-console-rule"></span>
+      <span class="w-2 h-2 rounded-full bg-console-rule"></span>
+    </span>
+    <span class="font-mono text-sm text-console-dim">Console</span>
+  </div>
+  <pre class="m-0 px-4 py-4 whitespace-pre-wrap break-words"><code><span class="text-console-dim">{prompt}</span>{output}</code></pre>
+</div>
